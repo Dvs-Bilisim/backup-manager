@@ -1,6 +1,6 @@
 {
   "name": "backup-manager",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "backup manager for various services",
   "main": "index.js",
   "scripts": {
@@ -11,8 +11,10 @@
   },
   "keywords": [
     "backup",
+    "restore",
     "mongodb",
-    "mongodump"
+    "mongodump",
+    "mongorestore"
   ],
   "author": "Umut Aydin",
   "license": "MIT",

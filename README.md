@@ -1,6 +1,6 @@
 # backup-manager (under development)
 
-It's a simple library to manage backup for various services
+It's a simple library to manage backups for various services
 
 ## Install
 
@@ -19,7 +19,6 @@ npm test
 
 ## TODO
 
-- Restoring an existing backup to MongoDB
 - Backup and restore for folders
 - Backup and restore for MySQL
 - Backup and restore for PostgreSQL
