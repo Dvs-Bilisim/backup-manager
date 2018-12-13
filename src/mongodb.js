@@ -85,7 +85,6 @@ class MongoDBPlugin extends BasePlugin {
                 mkdir(this.options.tmp, error => {
                     if (!exists(this.options.tmp)) return done(error || new Error('mkdir failed'));
 
-                    this.success(this.options.tmp);
                     done();
                 });
             },
