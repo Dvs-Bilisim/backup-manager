@@ -6,7 +6,9 @@ const exists = require('fs').existsSync;
 const files = require('fs').readdir;
 const formatDate = require('date-fns/format');
 const is = require('is_js');
+const joinPath = require('path').join;
 const stats = require('fs').statSync;
+const tmpdir = require('os').tmpdir;
 const unlink = require('fs').unlink;
 
 class BasePlugin {
@@ -15,7 +17,7 @@ class BasePlugin {
             throw new Error('options parameter must be an object');
 
         this.options = {
-            path: '/tmp/backup',
+            path: joinPath(tmpdir(), './backup'),
             filename: `backup-${ formatDate(new Date(), 'YYYYMMDDHH') }`,
             size: 100 * 1024 * 1024, // max total size of backup files in bytes
             min: 3, // at least 3 backups should be kept
@@ -58,11 +60,9 @@ class BasePlugin {
      * @memberof Base
      */
     purge(cb) {
-        files(this.options.path, (error, backups) => {
-            if (error) return cb(error);
-
+        this.fetchFiles(backups => {
             if (backups.length < this.options.min) {
-                this.warning(`Number of backups (${ backups.length } files) are more than ${ this.options.min }.`);
+                this.warning(`Number of backups (${ backups.length } files) are less than ${ this.options.min }.`);
                 return cb();
             }
 
@@ -94,8 +94,21 @@ class BasePlugin {
      * @memberof Base
      */
     recentBackupFile(cb) {
+        this.fetchFiles(backups => cb(backups.pop()));
+    }
+
+    /**
+     * @description Returns only files in a folder
+     * @memberof Base
+     */
+    fetchFiles(cb) {
         files(this.options.path, (error, backups) => {
-            cb(is.array(backups) && is.not.empty(backups) ? `${ this.options.path }/${ backups.pop() }` : undefined);
+            const files = [];
+            if (is.array(backups) && is.not.empty(backups))
+                for (let backup of backups)
+                    if (stats(`${ this.options.path }/${ backup }`).isFile())
+                        files.push(backup);
+            cb(files);
         });
     }
 

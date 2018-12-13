@@ -5,6 +5,8 @@ const exec = require('child_process').exec;
 const exists = require('fs').existsSync;
 const files = require('fs').readdirSync;
 const is = require('is_js');
+const joinPath = require('path').join;
+const mkdir = require('fs').mkdir;
 const series = require('async/series');
 
 class MongoDBPlugin extends BasePlugin {
@@ -39,7 +41,7 @@ class MongoDBPlugin extends BasePlugin {
             },
             done => {
                 const backups = files(this.options.tmp);
-                if (is.not.array(backups) || !backups.length) return done(new Error(''));
+                if (is.not.array(backups) || !backups.length) return done(new Error('mongodump failed'));
 
                 const archive = `${ this.options.path }/${ this.options.filename }.tar.gz`;
                 let command = this._command({ '-C': false, [this.options.tmp]: false, '-czvf': false,
@@ -61,6 +63,72 @@ class MongoDBPlugin extends BasePlugin {
             this.clearTemporaryFolder(error => {
                 if (error) this.fail(error.message);
                 this.purge(cb);
+            });
+        });
+    }
+
+    /**
+     * @description Restores an existing backup
+     * @param {Object} options
+     * @param {Function} [cb] callback
+     * @memberof MongoDBPlugin
+     */
+    restore(options, cb) {
+        if (is.not.function(cb)) cb = function (e) { if (e) this.fail(e); };
+        if (is.not.object(options) || is.array(options))
+            return cb(new Error('options parameter must be an object'));
+
+        this.configure({ tmp: `${ this.options.path }/tmp/restore-${ Math.random().toString().replace('.', '') }` });
+
+        series([
+            done => {
+                mkdir(this.options.tmp, error => {
+                    if (!exists(this.options.tmp)) return done(error || new Error('mkdir failed'));
+
+                    this.success(this.options.tmp);
+                    done();
+                });
+            },
+            done => {
+                this.recentBackupFile(file => {
+                    if (is.not.string(file)) return cb(new Error('backup file not found'));
+
+                    file = `${this.options.path}/${ file }`;
+                    if (!exists(file)) return cb(new Error(`${ file } does not exist`));
+
+                    let command = this._command({ '-xzvf': false, [file]: false, '-C': false, [this.options.tmp]: false }, 'tar');
+                    if (is.not.string(command)) return cb(new Error('invalid options for tar'));
+                    exec(command, error => {
+                        if (error) return done(error);
+
+                        const backup = files(this.options.tmp);
+                        if (is.not.array(backup) || !backup.length) return done(new Error('extracting backup failed'));
+
+                        this.success(command);
+                        done();
+                    });
+                });
+            },
+            done => {
+                options[joinPath(this.options.tmp, './*')] = false;
+                let command = this._command(options, 'mongorestore');
+                if (is.not.string(command)) return cb(new Error('invalid options for mongorestore'));
+                exec(command, error => {
+                    if (!exists(this.options.tmp)) return done(error || new Error('mongorestore failed'));
+
+                    this.success(command);
+                    done();
+                });
+            }
+        ], error => {
+            if (error)  {
+                this.fail(error.message);
+                return this.clearTemporaryFolder(error, cb);
+            }
+
+            this.clearTemporaryFolder(error => {
+                if (error) this.fail(error.message);
+                cb();
             });
         });
     }
