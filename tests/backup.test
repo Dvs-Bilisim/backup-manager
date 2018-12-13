@@ -13,7 +13,7 @@ if (!exists(path)) mkdir(path);
 const mongo = new MongoDB({ debug: true, path });
 
 test('Backup mongodb @ localhost', function (assert) {
-    mongo.backup({ host: 'localhost', db: 'test', gzip: true }, (error) => {
+    mongo.backup({ host: 'localhost', db: 'backup_test', gzip: true }, (error) => {
         if (!error) assert.ok(true, 'backup saved');
         else assert.fail(error.message);
         assert.end();

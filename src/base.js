@@ -1,6 +1,7 @@
 'use strict';
 
 const colors = require('colors/safe');
+const exec = require('child_process').exec;
 const exists = require('fs').existsSync;
 const files = require('fs').readdir;
 const formatDate = require('date-fns/format');
@@ -85,6 +86,59 @@ class BasePlugin {
                 cb();
             });
         });
+    }
+
+    /**
+     * @description Returns recent backup file
+     * @param {Function} cb callback
+     * @memberof Base
+     */
+    recentBackupFile(cb) {
+        files(this.options.path, (error, backups) => {
+            cb(is.array(backups) && is.not.empty(backups) ? `${ this.options.path }/${ backups.pop() }` : undefined);
+        });
+    }
+
+    /**
+     * @description Removes temporary folder
+     * @param {String} [err] error
+     * @param {Function} cb callback
+     * @memberof Base
+     */
+    clearTemporaryFolder(err, cb) {
+        if (is.function(err)) {
+            cb = err;
+            err = undefined;
+        }
+        const command = this._command({ '-Rf': false, [this.options.tmp]: false }, 'rm');
+        if (is.not.string(command)) return cb(new Error('invalid options for rm'));
+        exec(command, error => {
+            if (error) return cb(error);
+
+            cb(err);
+        });
+    }
+
+    /**
+     * @description Returns an executable command with correct parameters
+     * @param {Object} options
+     * @param {Function} [cb] callback
+     * @memberof MongoDBPlugin
+     */
+    _command(options, bin) {
+        if (is.not.object(options) || is.array(options))
+            throw new Error('options parameter must be an object');
+
+        const command = [ bin ];
+        for (let option of Object.keys(options)) {
+            if (is.string(options[option]))
+                command.push(`--${ option } ${ options[option] }`);
+            else if (is.boolean(options[option])) {
+                if (options[option]) command.push(`--${ option }`);
+                else command.push(option);
+            }
+        }
+        return command.join(' ');
     }
 
     /**
