@@ -1,0 +1,35 @@
+{
+  "name": "backup-manager",
+  "version": "0.2.1",
+  "description": "backup manager for various services",
+  "main": "index.js",
+  "scripts": {
+    "test": "chmod +x tests/backup.test && node tests/backup.test | ./node_modules/.bin/tap-spec"
+  },
+  "engines": {
+    "node": ">=v6.14.4"
+  },
+  "keywords": [
+    "backup",
+    "mongodb",
+    "mongodump"
+  ],
+  "author": "Umut Aydin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Dvs-Bilisim/backup-manager/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Dvs-Bilisim/backup-manager.git"
+  },
+  "devDependencies": {
+    "tap-spec": "^5.0.0",
+    "tape": "^4.9.1"
+  },
+  "dependencies": {
+    "colors": "^1.3.3",
+    "date-fns": "^1.30.1",
+    "is_js": "^0.9.0"
+  }
+}
