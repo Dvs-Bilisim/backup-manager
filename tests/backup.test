@@ -16,6 +16,11 @@ test('Backup mongodb @ localhost', function (assert) {
     mongo.backup({ host: 'localhost', db: 'backup_test', gzip: true }, (error) => {
         if (!error) assert.ok(true, 'backup saved');
         else assert.fail(error.message);
-        assert.end();
+
+        mongo.restore({ host: 'localhost', db: 'restore_test', gzip: true }, (error) => {
+            if (!error) assert.ok(true, 'backup restored');
+            else assert.fail(error.message);
+            assert.end();
+        });
     });
 });
