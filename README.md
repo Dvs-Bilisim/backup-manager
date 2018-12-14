@@ -17,6 +17,15 @@ npm i
 npm test
 ```
 
+## Configuration
+
+- **debug       :** Debug mode. It's disabled by default.
+- **filename    :** Name of backup file.
+- **min         :** Minimum number of backup files should be kept.
+- **overwrite   :** Flag for overwriting an existing backup file.
+- **path        :** Backup folder.
+- **size        :** Maximum amount of total back up files. If we reach that value, an old backup will be removed.
+
 ## TODO
 
 - Backup and restore for folders

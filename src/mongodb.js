@@ -41,9 +41,13 @@ class MongoDBPlugin extends BasePlugin {
             },
             done => {
                 const backups = files(this.options.tmp);
-                if (is.not.array(backups) || !backups.length) return done(new Error('mongodump failed'));
+                if (is.not.array(backups) || !backups.length)
+                    return done(new Error('mongodump failed'));
 
                 const archive = `${ this.options.path }/${ this.options.filename }.tar.gz`;
+                if (exists(archive) && !this.options.overwrite)
+                    return done(new Error('backup files already exists'));
+
                 let command = this._command({ '-C': false, [this.options.tmp]: false, '-czvf': false,
                     [archive]: false, [backups.join(' ')]: false }, 'tar');
                 if (is.not.string(command)) return cb(new Error('invalid options for tar'));
