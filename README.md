@@ -1,4 +1,4 @@
-# backup-manager (under development)
+# backup-manager
 
 It's a simple library to manage backups for various services
 
@@ -25,6 +25,26 @@ npm test
 - **overwrite   :** Flag for overwriting an existing backup file.
 - **path        :** Backup folder.
 - **size        :** Maximum amount of total back up files. If we reach that value, an old backup will be removed.
+
+## Backup Example
+
+```js
+const MongoDB = require('backup-manager').MongoDBPlugin;
+
+// path should be created before creating an instance
+const mongo = new MongoDB({ debug: true, path: '/tmp/backup' });
+mongo.backup({ host: 'localhost', db: 'test', gzip: true }, (error) => console.log(error));
+```
+
+## Restore Example
+
+```js
+const MongoDB = require('backup-manager').MongoDBPlugin;
+
+// path should exist and contain backup files
+const mongo = new MongoDB({ debug: true, path: '/tmp/backup' });
+mongo.restore({ host: 'localhost', db: 'test', gzip: true }, (error) => console.log(error));
+```
 
 ## TODO
 
