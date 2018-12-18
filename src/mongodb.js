@@ -46,7 +46,7 @@ class MongoDBPlugin extends BasePlugin {
 
                 const archive = `${ this.options.path }/${ this.options.filename }.tar.gz`;
                 if (exists(archive) && !this.options.overwrite)
-                    return done(new Error('backup files already exists'));
+                    return done(new Error('backup file already exists'));
 
                 let command = this._command({ '-C': false, [this.options.tmp]: false, '-czvf': false,
                     [archive]: false, [backups.join(' ')]: false }, 'tar');
