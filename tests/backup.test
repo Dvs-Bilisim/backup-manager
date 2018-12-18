@@ -4,23 +4,48 @@
 
 const exists = require('fs').existsSync;
 const mkdir = require('fs').mkdirSync;
+const series = require('async').series;
 const test = require('tape').test;
 
 const MongoDB = require('../').MongoDBPlugin;
+const MySQL = require('../').MySQLPlugin;
 
 const path = '/tmp/backup';
 if (!exists(path)) mkdir(path);
+
 const mongo = new MongoDB({ debug: true, path });
 
-test('Backup mongodb @ localhost', function (assert) {
-    mongo.backup({ host: 'localhost', db: 'backup_test', gzip: true }, (error) => {
-        if (!error) assert.ok(true, 'backup saved');
-        else assert.fail(error.message);
+const mysql = new MySQL({ debug: true, path });
 
-        mongo.restore({ host: 'localhost', db: 'restore_test', gzip: true }, (error) => {
-            if (!error) assert.ok(true, 'backup restored');
-            else assert.fail(error.message);
-            assert.end();
-        });
+test('backup & restore @ localhost', function (assert) {
+    series([
+        done => {
+            mongo.backup({ host: 'localhost', db: 'backup_test', gzip: true }, error => {
+                if (error) return done(error);
+
+                assert.ok(true, 'mongodb backup saved');
+                done();
+            });
+        },
+        done => {
+            mongo.restore({ host: 'localhost', db: 'restore_test', gzip: true }, error => {
+                if (error) return done(error);
+
+                assert.ok(true, 'mongodb backup restored');
+                done();
+            });
+        },
+        done => {
+            mysql.backup({ '-h': false, localhost: false, '-uroot': false, databases: 'backup_test' }, error => {
+                if (error) return done(error);
+
+                assert.ok(true, 'mysql backup saved');
+                done();
+            });
+        }
+    ], error => {
+        if (error) assert.fail(error.message);
+
+        assert.end();
     });
 });
