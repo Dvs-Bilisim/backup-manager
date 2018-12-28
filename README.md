@@ -33,7 +33,7 @@ const MongoDB = require('backup-manager').MongoDBPlugin;
 
 // path should be created before creating an instance
 const mongo = new MongoDB({ debug: true, path: '/tmp/backup' });
-mongo.backup({ host: 'localhost', db: 'test', gzip: true }, error => console.log(error));
+mongo.backup([ '--host localhost', '--db test', '--gzip' ], error => console.log(error));
 ```
 
 ## Restore Example for MongoDB
@@ -43,7 +43,7 @@ const MongoDB = require('backup-manager').MongoDBPlugin;
 
 // path should exist and contain backup files
 const mongo = new MongoDB({ debug: true, path: '/tmp/backup' });
-mongo.restore({ host: 'localhost', db: 'test', gzip: true }, error => console.log(error));
+mongo.restore([ '--host localhost', '--db test', '--gzip' ], error => console.log(error));
 ```
 
 ## Backup Example for MySQL
@@ -53,7 +53,7 @@ const MySQL = require('backup-manager').MySQLPlugin;
 
 // path should be created before creating an instance
 const mysql = new MySQL({ debug: true, path: '/tmp/backup' });
-mysql.backup({ '-h': false, localhost: false, '-uroot': false, databases: 'backup_test' }, error => console.log(error));
+mysql.backup([ '-h localhost', '-uroot', '--databases backup_test' ], error => console.log(error));
 ```
 
 ## TODO
