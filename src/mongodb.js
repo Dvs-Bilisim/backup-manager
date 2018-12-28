@@ -22,15 +22,15 @@ class MongoDBPlugin extends BasePlugin {
      */
     backup(options, cb) {
         if (is.not.function(cb)) cb = function (e) { if (e) this.fail(e); };
-        if (is.not.object(options) || is.array(options))
-            return cb(new Error('options parameter must be an object'));
+        if (is.not.array(options)) return cb(new Error('options parameter must be an array'));
 
         this.configure({ tmp: `${ this.options.path }/tmp/backup-${ Math.random().toString().replace('.', '') }` });
-        options.out = this.options.tmp;
+        options.push(`--out ${ this.options.tmp }`);
 
         series([
             done => {
                 let command = this._command(options, 'mongodump');
+                console.log(command);
                 if (is.not.string(command)) return cb(new Error('invalid options for mongodump'));
                 exec(command, error => {
                     if (!exists(this.options.tmp)) return done(error || new Error('mongodump failed'));
@@ -48,8 +48,7 @@ class MongoDBPlugin extends BasePlugin {
                 if (exists(archive) && !this.options.overwrite)
                     return done(new Error('backup file already exists'));
 
-                let command = this._command({ '-C': false, [this.options.tmp]: false, '-czvf': false,
-                    [archive]: false, [backups.join(' ')]: false }, 'tar');
+                let command = this._command([ '-C', this.options.tmp, '-czvf', archive, backups.join(' ') ], 'tar');
                 if (is.not.string(command)) return cb(new Error('invalid options for tar'));
                 exec(command, error => {
                     if (!exists(archive)) return done(error || new Error('archiving failed'));
@@ -79,8 +78,7 @@ class MongoDBPlugin extends BasePlugin {
      */
     restore(options, cb) {
         if (is.not.function(cb)) cb = function (e) { if (e) this.fail(e); };
-        if (is.not.object(options) || is.array(options))
-            return cb(new Error('options parameter must be an object'));
+        if (is.not.array(options)) return cb(new Error('options parameter must be an array'));
 
         this.configure({ tmp: `${ this.options.path }/tmp/restore-${ Math.random().toString().replace('.', '') }` });
 
@@ -99,7 +97,7 @@ class MongoDBPlugin extends BasePlugin {
                     file = `${this.options.path}/${ file }`;
                     if (!exists(file)) return cb(new Error(`${ file } does not exist`));
 
-                    let command = this._command({ '-xzvf': false, [file]: false, '-C': false, [this.options.tmp]: false }, 'tar');
+                    let command = this._command([ '-xzvf', file, '-C', this.options.tmp ], 'tar');
                     if (is.not.string(command)) return cb(new Error('invalid options for tar'));
                     exec(command, error => {
                         if (error) return done(error);
@@ -113,7 +111,7 @@ class MongoDBPlugin extends BasePlugin {
                 });
             },
             done => {
-                options[joinPath(this.options.tmp, './*')] = false;
+                options.push(joinPath(this.options.tmp, './*'));
                 let command = this._command(options, 'mongorestore');
                 if (is.not.string(command)) return cb(new Error('invalid options for mongorestore'));
                 exec(command, error => {

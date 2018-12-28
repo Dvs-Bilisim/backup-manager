@@ -20,8 +20,8 @@ class MongoDBPlugin extends BasePlugin {
      */
     backup(options, cb) {
         if (is.not.function(cb)) cb = function (e) { if (e) this.fail(e); };
-        if (is.not.object(options) || is.array(options))
-            return cb(new Error('options parameter must be an object'));
+        if (is.not.array(options))
+            return cb(new Error('options parameter must be an array'));
 
         series([
             done => {
@@ -30,9 +30,9 @@ class MongoDBPlugin extends BasePlugin {
                     return done(new Error('backup file already exists'));
 
                 if (is.not.string(options.databases))
-                    options['--all-databases'] = false;
+                    options.push('--all-databases');
 
-                options[`> ${ archive }`] = false;
+                options.push(`> ${ archive }`);
                 let command = this._command(options, 'mysqldump');
                 if (is.not.string(command)) return cb(new Error('invalid options for mysqldump'));
                 exec(command, error => {
@@ -47,8 +47,8 @@ class MongoDBPlugin extends BasePlugin {
                 if (exists(archive) && !this.options.overwrite)
                     return done(new Error('backup file already exists'));
 
-                let command = this._command({ '-C': false, [this.options.path]: false, '-czvf': false,
-                    [archive]: false, [`${ this.options.filename }.sql`]: false }, 'tar');
+                let command = this._command([ '-C', this.options.path, '-czvf',
+                    archive, `${ this.options.filename }.sql` ], 'tar');
                 if (is.not.string(command)) return cb(new Error('invalid options for tar'));
                 exec(command, error => {
                     if (!exists(archive)) return done(error || new Error('archiving failed'));
