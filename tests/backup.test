@@ -17,7 +17,7 @@ const mongo = new MongoDB({ debug: true, path });
 test('backup & restore @ localhost', function (assert) {
     series([
         done => {
-            mongo.backup([ '--host localhost', '--db meyhane', '--gzip' ], error => {
+            mongo.backup([ '--host localhost', '--db backup_test', '--gzip' ], error => {
                 if (error) return done(error);
 
                 assert.ok(true, 'mongodb backup saved');
