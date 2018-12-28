@@ -17,7 +17,7 @@ class BasePlugin {
             throw new Error('options parameter must be an object');
 
         this.options = {
-            path: joinPath(tmpdir(), './backup'),
+            path: joinPath(tmpdir(), 'backup'),
             filename: `backup-${ formatDate(new Date(), 'YYYYMMDDHH') }`,
             size: 100 * 1024 * 1024, // max total size of backup files in bytes
             min: 3, // at least 3 backups should be kept

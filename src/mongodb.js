@@ -24,7 +24,7 @@ class MongoDBPlugin extends BasePlugin {
         if (is.not.function(cb)) cb = function (e) { if (e) this.fail(e); };
         if (is.not.array(options)) return cb(new Error('options parameter must be an array'));
 
-        this.configure({ tmp: `${ this.options.path }/tmp/backup-${ Math.random().toString().replace('.', '') }` });
+        this.configure({ tmp: joinPath(this.options.path, 'tmp', `backup-${ Math.random().toString().replace('.', '') }`) });
         options.push(`--out ${ this.options.tmp }`);
 
         series([
@@ -80,7 +80,7 @@ class MongoDBPlugin extends BasePlugin {
         if (is.not.function(cb)) cb = function (e) { if (e) this.fail(e); };
         if (is.not.array(options)) return cb(new Error('options parameter must be an array'));
 
-        this.configure({ tmp: `${ this.options.path }/tmp/restore-${ Math.random().toString().replace('.', '') }` });
+        this.configure({ tmp: joinPath(this.options.path, 'tmp', `restore-${ Math.random().toString().replace('.', '') }`) });
 
         series([
             done => {
