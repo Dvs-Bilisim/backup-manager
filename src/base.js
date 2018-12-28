@@ -123,7 +123,7 @@ class BasePlugin {
             cb = err;
             err = undefined;
         }
-        const command = this._command({ '-Rf': false, [this.options.tmp]: false }, 'rm');
+        const command = this._command([ '-Rf', this.options.tmp ], 'rm');
         if (is.not.string(command)) return cb(new Error('invalid options for rm'));
         exec(command, error => {
             if (error) return cb(error);
@@ -139,19 +139,10 @@ class BasePlugin {
      * @memberof MongoDBPlugin
      */
     _command(options, bin) {
-        if (is.not.object(options) || is.array(options))
-            throw new Error('options parameter must be an object');
+        if (is.not.array(options) || is.not.string(bin) || is.empty(bin))
+            return undefined;
 
-        const command = [ bin ];
-        for (let option of Object.keys(options)) {
-            if (is.string(options[option]))
-                command.push(`--${ option } ${ options[option] }`);
-            else if (is.boolean(options[option])) {
-                if (options[option]) command.push(`--${ option }`);
-                else command.push(option);
-            }
-        }
-        return command.join(' ');
+        return [ ...[ bin ], ...options ].join(' ');
     }
 
     /**
