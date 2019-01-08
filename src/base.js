@@ -68,7 +68,7 @@ class BasePlugin {
 
             let size = 0;
             for (let file of backups) {
-                const info = stats(`${ this.options.path }/${ file }`);
+                const info = stats(joinPath(this.options.path, file));
                 size += info.size;
             }
             if (size < this.options.size) {
@@ -77,7 +77,7 @@ class BasePlugin {
             }
 
             const file = backups.shift();
-            const path = `${ this.options.path }/${ file }`;
+            const path = joinPath(this.options.path, file);
             const info = stats(path);
             unlink(path, error => {
                 if (error) return cb(error);

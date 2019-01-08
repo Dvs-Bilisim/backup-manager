@@ -4,6 +4,7 @@ const BasePlugin = require('./base');
 const exec = require('child_process').exec;
 const exists = require('fs').existsSync;
 const is = require('is_js');
+const joinPath = require('path').join;
 const series = require('async/series');
 const unlink = require('fs').unlinkSync;
 
@@ -25,7 +26,7 @@ class MongoDBPlugin extends BasePlugin {
 
         series([
             done => {
-                const archive = `${ this.options.path }/${ this.options.filename }.sql`;
+                const archive = joinPath(this.options.path, `${ this.options.filename }.sql`);
                 if (exists(archive) && !this.options.overwrite)
                     return done(new Error('backup file already exists'));
 
@@ -43,7 +44,7 @@ class MongoDBPlugin extends BasePlugin {
                 });
             },
             done => {
-                const archive = `${ this.options.path }/${ this.options.filename }.tar.gz`;
+                const archive = joinPath(this.options.path, `${ this.options.filename }.tar.gz`);
                 if (exists(archive) && !this.options.overwrite)
                     return done(new Error('backup file already exists'));
 
@@ -53,7 +54,7 @@ class MongoDBPlugin extends BasePlugin {
                 exec(command, error => {
                     if (!exists(archive)) return done(error || new Error('archiving failed'));
 
-                    unlink(`${ this.options.path }/${ this.options.filename }.sql`);
+                    unlink(joinPath(this.options.path, `${ this.options.filename }.sql`));
                     this.success(command);
                     done();
                 });

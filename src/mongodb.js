@@ -94,7 +94,7 @@ class MongoDBPlugin extends BasePlugin {
                 this.recentBackupFile(file => {
                     if (is.not.string(file)) return cb(new Error('backup file not found'));
 
-                    file = `${this.options.path}/${ file }`;
+                    file = joinPath(this.options.path, file);
                     if (!exists(file)) return cb(new Error(`${ file } does not exist`));
 
                     let command = this._command([ '-xzvf', file, '-C', this.options.tmp ], 'tar');
@@ -111,7 +111,7 @@ class MongoDBPlugin extends BasePlugin {
                 });
             },
             done => {
-                options.push(joinPath(this.options.tmp, './*'));
+                options.push(joinPath(this.options.tmp, '*'));
                 let command = this._command(options, 'mongorestore');
                 if (is.not.string(command)) return cb(new Error('invalid options for mongorestore'));
                 exec(command, error => {
