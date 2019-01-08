@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const exists = require('fs').existsSync;
+const mkdir = require('fs').mkdirSync;
+const series = require('async').series;
+const test = require('tape').test;
+
+const MongoDB = require('..').MongoDBPlugin;
+
+const path = '/tmp/backup';
+if (!exists(path)) mkdir(path);
+
+const mongo = new MongoDB({ debug: true, path });
+
+test('backup & restore @ localhost', function (assert) {
+    series([
+        done => {
+            mongo.backup([ '--host localhost', '--db backup_test', '--gzip' ], error => {
+                if (error) return done(error);
+
+                assert.ok(true, 'mongodb backup saved');
+                done();
+            });
+        },
+        done => {
+            mongo.restore([ '--host localhost', '--db restore_test', '--gzip' ], error => {
+                if (error) return done(error);
+
+                assert.ok(true, 'mongodb backup restored');
+                done();
+            });
+        }
+    ], error => {
+        if (error) assert.fail(error.message);
+
+        assert.end();
+    });
+});
