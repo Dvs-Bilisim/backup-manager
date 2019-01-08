@@ -3,6 +3,7 @@
 'use strict';
 
 const exists = require('fs').existsSync;
+const is = require('is_js');
 const mkdir = require('fs').mkdirSync;
 const series = require('async').series;
 const test = require('tape').test;
@@ -17,8 +18,8 @@ const mysql = new MySQL({ debug: true, path });
 test('backup & restore @ localhost', function (assert) {
     series([
         done => {
-            mysql.backup([ '-h localhost', '-uroot', '--databases backup_test' ], error => {
-                if (error) return done(error);
+            mysql.backup([ '-h localhost', '-uroot', '--databases backup_test' ], r => {
+                if (is.error(r)) return done(r);
 
                 assert.ok(true, 'mysql backup saved');
                 done();
