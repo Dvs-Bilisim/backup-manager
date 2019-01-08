@@ -27,6 +27,7 @@ class MongoDBPlugin extends BasePlugin {
         this.configure({ tmp: joinPath(this.options.path, 'tmp', `backup-${ Math.random().toString().replace('.', '') }`) });
         options.push(`--out ${ this.options.tmp }`);
 
+        const archive = `${ this.options.path }/${ this.options.filename }.tar.gz`;
         series([
             done => {
                 let command = this._command(options, 'mongodump');
@@ -44,7 +45,6 @@ class MongoDBPlugin extends BasePlugin {
                 if (is.not.array(backups) || !backups.length)
                     return done(new Error('mongodump failed'));
 
-                const archive = `${ this.options.path }/${ this.options.filename }.tar.gz`;
                 if (exists(archive) && !this.options.overwrite)
                     return done(new Error('backup file already exists'));
 
@@ -60,12 +60,16 @@ class MongoDBPlugin extends BasePlugin {
         ], error => {
             if (error)  {
                 this.fail(error.message);
-                return this.clearTemporaryFolder(error, cb);
+                return this.clearTemporaryFolder(error, e => {
+                    if (e) return cb(e);
+
+                    cb(archive);
+                });
             }
 
             this.clearTemporaryFolder(error => {
                 if (error) this.fail(error.message);
-                this.purge(cb);
+                this.purge(() => cb(archive));
             });
         });
     }

@@ -24,6 +24,7 @@ class MongoDBPlugin extends BasePlugin {
         if (is.not.array(options))
             return cb(new Error('options parameter must be an array'));
 
+        const archive = joinPath(this.options.path, `${ this.options.filename }.tar.gz`);
         series([
             done => {
                 const archive = joinPath(this.options.path, `${ this.options.filename }.sql`);
@@ -44,7 +45,6 @@ class MongoDBPlugin extends BasePlugin {
                 });
             },
             done => {
-                const archive = joinPath(this.options.path, `${ this.options.filename }.tar.gz`);
                 if (exists(archive) && !this.options.overwrite)
                     return done(new Error('backup file already exists'));
 
@@ -62,12 +62,16 @@ class MongoDBPlugin extends BasePlugin {
         ], error => {
             if (error)  {
                 this.fail(error.message);
-                return this.clearTemporaryFolder(error, cb);
+                return this.clearTemporaryFolder(error, e => {
+                    if (e) return cb(e);
+
+                    cb(archive);
+                });
             }
 
             this.clearTemporaryFolder(error => {
                 if (error) this.fail(error.message);
-                this.purge(cb);
+                this.purge(() => cb(archive));
             });
         });
     }
