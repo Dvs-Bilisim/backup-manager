@@ -1,10 +1,10 @@
 {
   "name": "backup-manager",
-  "version": "0.6.2",
+  "version": "0.6.4",
   "description": "backup manager for various services",
   "main": "index.js",
   "scripts": {
-    "test": "chmod +x tests/backup.test && node tests/backup.test | ./node_modules/.bin/tap-spec"
+    "test": "chmod +x tests/*.test && node tests/*.test | ./node_modules/.bin/tap-spec"
   },
   "engines": {
     "node": ">=v6.14.4"
