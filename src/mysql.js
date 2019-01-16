@@ -65,13 +65,13 @@ class MongoDBPlugin extends BasePlugin {
                 return this.clearTemporaryFolder(error, e => {
                     if (e) return cb(e);
 
-                    cb(archive);
+                    cb(null, archive);
                 });
             }
 
             this.clearTemporaryFolder(error => {
                 if (error) this.fail(error.message);
-                this.purge(() => cb(archive));
+                this.purge(() => cb(null, archive));
             });
         });
     }
