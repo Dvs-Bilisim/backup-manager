@@ -1,6 +1,6 @@
 {
   "name": "backup-manager",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "description": "backup manager for various services",
   "main": "index.js",
   "scripts": {
